@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h2>Gerenciar usuários</h2>
+
+<!-- Formulário único: se tiver "id" preenche e vira edição -->
+<form method="post" class="form" style="margin:1rem 0;">
+  <input type="hidden" name="id" id="u_id">
+  <label>Usuário
+    <input name="nome_usuario" id="u_nome" required>
+  </label>
+  <label>Senha
+    <input type="password" name="senha" id="u_senha" placeholder="(deixe em branco para manter)" >
+  </label>
+  <label>Permissão
+    <select name="papel" id="u_papel">
+      <option value="usuario">Usuário</option>
+      <option value="admin">Admin</option>
+    </select>
+  </label>
+  <button class="btn" type="submit">Salvar</button>
+  <button class="btn danger" type="button" onclick="limparFormUser()">Cancelar</button>
+</form>
+
+<table class="admin-table">
+  <thead>
+  <tr><th>ID</th><th>Usuário</th><th>Papel</th><th>Criado em</th><th>Ações</th></tr>
+  </thead>
+  <tbody>
+  {% for u in usuarios %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td>{{ u.nome_usuario }}</td>
+      <td>{{ u.papel }}</td>
+      <td>{{ u.criado_em.strftime('%d/%m/%Y %H:%M') if u.criado_em else '' }}</td>
+      <td>
+        <button class="btn" type="button"
+          onclick="editarUser('{{ u.id }}','{{ u.nome_usuario }}','{{ u.papel }}')">Editar</button>
+
+        <form method="post" action="{{ url_for('usuario_excluir', uid=u.id) }}" style="display:inline"
+              onsubmit="return confirm('Excluir este usuário?')">
+          <button class="btn danger" type="submit">Excluir</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  function editarUser(id, nome, papel){
+    document.getElementById('u_id').value = id;
+    document.getElementById('u_nome').value = nome;
+    document.getElementById('u_papel').value = papel;
+    document.getElementById('u_senha').value = ""; // senha opcional na edição
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function limparFormUser(){
+    document.getElementById('u_id').value = "";
+    document.getElementById('u_nome').value = "";
+    document.getElementById('u_papel').value = "usuario";
+    document.getElementById('u_senha').value = "";
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Entrar - Loja Grid{% endblock %}
+
+{% block extra_css %}
+<style>
+  .login-wrap{
+    max-width:420px;margin:40px auto;background:#fff;border:1px solid var(--border);
+    border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.06);overflow:hidden;
+  }
+  .login-body{padding:18px}
+  .login-head{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--border)}
+  .login-head .logo{
+    width:44px;height:44px;border-radius:10px;display:grid;place-items:center;
+    background:#f3f5f7;border:1px solid var(--border);
+  }
+  .login-head .logo svg{width:26px;height:26px}
+  .login-title{margin:0;font-weight:700}
+  .muted{color:var(--muted);font-size:.9rem}
+
+  .field{margin-bottom:12px}
+  .field label{display:block;font-weight:600;margin:0 0 6px}
+  .field .row{
+    display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;
+  }
+  .field .row span.leading{
+    padding:10px 12px;border-right:1px solid var(--border);user-select:none
+  }
+  .field input{
+    flex:1;border:0;outline:0;padding:10px 12px;background:transparent
+  }
+  .field .row:focus-within{outline:2px solid #5b9df9; outline-offset:2px; border-color:#5b9df9}
+
+  .alert{
+    border-radius:10px;padding:10px 12px;margin:10px 0;font-weight:600
+  }
+  .alert.ok{background:#e8f7ee;border:1px solid #c7ebd3;color:#0a7a3b}
+  .alert.err{background:#fdecec;border:1px solid #f7c1c1;color:#9a1a1a}
+
+  .actions{margin-top:12px;display:grid;gap:8px}
+  .actions .btn{justify-content:center}
+  .back{display:block;text-align:center;margin-top:12px;text-decoration:none}
+</style>
+{% endblock %}
+
+{% block content %}
+
+  <div class="login-wrap">
+    <div class="login-head">
+      <!-- Ícone Bootstrap (bag) em SVG inline -->
+      <div class="logo" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" role="img" aria-label="Loja">
+          <path d="M8 1a2.5 2.5 0 0 0-2.5 2.5V4H3.5A1.5 1.5 0 0 0 2 5.5v7A2.5 2.5 0 0 0 4.5 15h7A2.5 2.5 0 0 0 14 12.5v-7A1.5 1.5 0 0 0 12.5 4H10.5v-.5A2.5 2.5 0 0 0 8 1Zm-1.5 3v-.5a1.5 1.5 0 1 1 3 0V4h-3Z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="login-title">Loja Grid</h1>
+        <div class="muted">Área do administrador</div>
+      </div>
+    </div>
+
+    <div class="login-body">
+
+      {# flashes #}
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          {% for cat, msg in msgs %}
+            <div class="alert {{ 'ok' if cat=='ok' else 'err' }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="post" action="{{ url_for('login', next=request.args.get('next')) }}">
+        <div class="field">
+          <label for="username">Usuário</label>
+          <div class="row">
+            <span class="leading" aria-hidden="true">👤</span>
+            <input id="username" name="username" type="text" placeholder="seu usuário" required autofocus
+                   autocomplete="username">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Senha</label>
+          <div class="row">
+            <span class="leading" aria-hidden="true">🔒</span>
+            <input id="password" name="password" type="password" placeholder="sua senha" required
+                   autocomplete="current-password">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn--primary" type="submit">Entrar</button>
+        </div>
+
+        <a class="back" href="{{ url_for('index') }}">← Voltar ao site</a>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

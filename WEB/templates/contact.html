@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ company }} · Contato{% endblock %}
+{% block content %}
+<main class="container">
+  <h2>Contato</h2>
+  <div class="card" style="padding:1rem">
+    <div class="desc">{{ content|safe }}</div>
+    <p style="margin-top:.75rem"><strong>Telefone:</strong> {{ phone }}</p>
+  </div>
+</main>
+{% endblock %}

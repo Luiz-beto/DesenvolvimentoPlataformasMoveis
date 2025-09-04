@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}Contatos - Loja Grid{% endblock %}
+
+{% block content %}
+
+  <div class="toolbar">
+    <h2 style="margin:0">Contatos</h2>
+    {% if user and user.papel == 'admin' %}
+      <button class="btn btn--primary" onclick="openModal('modalAdicionar')">+ Adicionar</button>
+    {% endif %}
+  </div>
+
+  <!-- GRID DE CONTATOS -->
+  <div class="grid">
+    {% for c in contatos %}
+      {# ---- FALLBACKS para contatos reais (se faltar foto/email/telefone) ---- #}
+      {% set seed = (c.id if c.id is not none else loop.index0) %}
+      {% set foto_src = c.foto_url or ('https://i.pravatar.cc/600?u=contato-' ~ seed) %}
+      {% set doms = ['gmail.com','outlook.com','yahoo.com','proton.me'] %}
+      {% set nome_slug = (c.nome|default('contato-' ~ seed)|lower|replace(' ', '.')) %}
+      {% set email_show = c.email or (nome_slug ~ '@' ~ doms[seed % doms|length]) %}
+      {# telefone BR gerado: 55 + DDD + 9 + número #}
+      {% set ddds = ['11','21','31','41','47','51','61','62','67','71','81','85','92'] %}
+      {% set ddd = ddds[seed % ddds|length] %}
+      {% set base_num = (seed * 7919) % 90000000 + 10000000 %}
+      {% set tel_show = c.telefone or ('(' ~ ddd ~ ') 9' ~ (base_num|string)[0:4] ~ '-' ~ (base_num|string)[4:8]) %}
+      {% set wa_link = c.whats_url or ('https://wa.me/55' ~ ddd ~ '9' ~ (base_num|string)) %}
+
+      <article class="card"
+               data-id="{{ c.id }}"
+               data-nome="{{ c.nome }}"
+               data-telefone="{{ tel_show }}"
+               data-email="{{ email_show }}">
+        <div style="position:relative">
+          <img class="card__img" src="{{ foto_src }}" alt="{{ c.nome }}">
+          {% if user and user.papel == 'admin' %}
+          <!-- Controles admin (editar / excluir) -->
+          <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px">
+            <button class="btn" title="Editar" onclick="abrirEditar(this)">✎</button>
+            <form method="post"
+                  action="{{ url_for('excluir_contato', id=c.id) }}"
+                  onsubmit="return confirm('Excluir este contato?')">
+              <button class="btn" title="Excluir">✕</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="card__body">
+          <h3 class="card__title">{{ c.nome }}</h3>
+          <p class="card__desc">
+            <a href="mailto:{% if c.email %}{{ c.email }}{% else %}{{ email_show }}{% endif %}">
+              {% if c.email %}{{ c.email }}{% else %}{{ email_show }}{% endif %}
+            </a><br>
+            <a href="{{ wa_link }}" target="_blank" rel="noopener">WhatsApp: {{ tel_show }}</a>
+          </p>
+        </div>
+      </article>
+    {% else %}
+      {# ---- PLACEHOLDERS quando não há contatos: nomes/emails/telefones + fotos pravatar ---- #}
+      {% set first_names = ['Ana','Bruno','Carla','Diego','Elaine','Felipe','Giovana','Heitor','Isabela','João','Karina','Lucas','Marina','Nicolas','Olivia','Pedro','Queila','Rafael','Sofia','Thiago','Ursula','Vitor','Wanessa','Xavier','Yasmin','Zeca'] %}
+      {% set last_names  = ['Silva','Souza','Oliveira','Santos','Pereira','Costa','Ferreira','Rodrigues','Almeida','Gomes','Barbosa','Ribeiro','Lima','Araújo','Cardoso','Moura'] %}
+      {% set doms = ['gmail.com','outlook.com','yahoo.com','proton.me'] %}
+      {% set ddds = ['11','21','31','41','47','51','61','62','67','71','81','85','92'] %}
+
+      {% for i in range(8) %}
+        {% set f = first_names[i % first_names|length] %}
+        {% set l = last_names[(i*7) % last_names|length] %}
+        {% set nome = f ~ ' ' ~ l %}
+        {% set nome_slug = (f|lower ~ '.' ~ l|lower) %}
+        {% set email = nome_slug ~ '@' ~ doms[i % doms|length] %}
+        {% set ddd = ddds[i % ddds|length] %}
+        {% set base_num = (i * 7919) % 90000000 + 10000000 %}
+        {% set tel = '(' ~ ddd ~ ') 9' ~ (base_num|string)[0:4] ~ '-' ~ (base_num|string)[4:8] %}
+        {% set wa = 'https://wa.me/55' ~ ddd ~ '9' ~ (base_num|string) %}
+        {% set foto = 'https://i.pravatar.cc/600?u=placeholder-' ~ i %}
+
+        <article class="card">
+          <img class="card__img" src="{{ foto }}" alt="{{ nome }}">
+          <div class="card__body">
+            <h3 class="card__title">{{ nome }}</h3>
+            <p class="card__desc">
+              <a href="mailto:{{ email }}">{{ email }}</a><br>
+              <a href="{{ wa }}" target="_blank" rel="noopener">WhatsApp: {{ tel }}</a>
+            </p>
+          </div>
+        </article>
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  {% if user and user.papel == 'admin' %}
+  <!-- MODAL ADICIONAR -->
+  <div class="modal" id="modalAdicionar" aria-hidden="true">
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="mdc-add">
+      <div class="modal__head">
+        <strong id="mdc-add">Adicionar contato</strong>
+        <button class="btn" onclick="closeModal('modalAdicionar')">Fechar</button>
+      </div>
+      <form class="modal__body" method="post" action="{{ url_for('criar_contato') }}" enctype="multipart/form-data">
+        <div class="field">
+          <label for="c_nome">Nome</label>
+          <input id="c_nome" name="nome" required />
+        </div>
+        <div class="field">
+          <label for="c_tel">Telefone (com DDD)</label>
+          <input id="c_tel" name="telefone" required />
+        </div>
+        <div class="field">
+          <label for="c_email">E-mail</label>
+          <input id="c_email" name="email" type="email" />
+        </div>
+        <div class="field">
+          <label for="c_foto">Foto</label>
+          <input id="c_foto" name="foto" type="file" accept="image/*" />
+        </div>
+        <div class="modal__foot">
+          <button type="button" class="btn" onclick="closeModal('modalAdicionar')">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR -->
+  <div class="modal" id="modalEditar" aria-hidden="true">
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="mdc-edit">
+      <div class="modal__head">
+        <strong id="mdc-edit">Editar contato</strong>
+        <button class="btn" onclick="closeModal('modalEditar')">Fechar</button>
+      </div>
+      <form class="modal__body" id="formEditar" method="post" action="#" enctype="multipart/form-data">
+        <div class="field">
+          <label for="e_c_nome">Nome</label>
+          <input id="e_c_nome" name="nome" required />
+        </div>
+        <div class="field">
+          <label for="e_c_tel">Telefone (com DDD)</label>
+          <input id="e_c_tel" name="telefone" required />
+        </div>
+        <div class="field">
+          <label for="e_c_email">E-mail</label>
+          <input id="e_c_email" name="email" type="email" />
+        </div>
+        <div class="field">
+          <label for="e_c_foto">Trocar foto (opcional)</label>
+          <input id="e_c_foto" name="foto" type="file" accept="image/*" />
+        </div>
+        <div class="modal__foot">
+          <button type="button" class="btn" onclick="closeModal('modalEditar')">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function abrirEditar(btn){
+    const card = btn.closest('.card');
+    const id = card.dataset.id;
+
+    document.getElementById('e_c_nome').value  = card.dataset.nome || '';
+    document.getElementById('e_c_tel').value   = card.dataset.telefone || '';
+    document.getElementById('e_c_email').value = card.dataset.email || '';
+
+    const form = document.getElementById('formEditar');
+    form.action = `/contatos/${id}`;
+    openModal('modalEditar');
+  }
+</script>
+{% endblock %}

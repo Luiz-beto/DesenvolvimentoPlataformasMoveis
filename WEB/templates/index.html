@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Início - Loja Grid{% endblock %}
+
+{% block content %}
+
+  <div class="toolbar">
+    <h2 style="margin:0">Produtos</h2>
+    {% if user and user.papel == 'admin' %}
+      <button class="btn btn--primary" onclick="openModal('modalAdicionar')">+ Adicionar</button>
+    {% endif %}
+  </div>
+
+  <!-- GRID DE PRODUTOS -->
+  <div class="grid">
+    {% for p in produtos %}
+      <article class="card"
+               data-id="{{ p.id }}"
+               data-nome="{{ p.nome }}"
+               data-preco="{{ '%.2f'|format(p.preco) }}"
+               data-descricao="{{ p.descricao|default('', true) }}">
+        <div style="position:relative">
+          {# usa a imagem do produto OU gera uma imagem estável do Picsum por seed #}
+          {% set seed = (p.id or p.nome|default('produto')|replace(' ', '-')|lower) %}
+          {% set img_url = p.imagem_url or ('https://picsum.photos/seed/' ~ seed ~ '/600/450') %}
+          <img class="card__img" src="{{ img_url }}" alt="{{ p.nome }}">
+
+          {% if user and user.papel == 'admin' %}
+          <!-- Controles admin -->
+          <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px">
+            <button class="btn" title="Editar" onclick="abrirEditar(this)">✎</button>
+            <form method="post" action="{{ url_for('excluir_produto', id=p.id) }}" onsubmit="return confirm('Excluir este produto?')">
+              <button class="btn" title="Excluir">✕</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="card__body">
+          <h3 class="card__title">{{ p.nome }}</h3>
+          {% if p.descricao %}<p class="card__desc">{{ p.descricao }}</p>{% endif %}
+          {% if p.preco is not none %}<div class="price">R$ {{ '%.2f'|format(p.preco) }}</div>{% endif %}
+        </div>
+      </article>
+    {% else %}
+      {# placeholders quando não há produtos: usa imagens variadas com seed por índice #}
+      {% for _ in range(8) %}
+      <article class="card">
+        <img class="card__img" src="https://picsum.photos/seed/produto-{{ loop.index }}/600/450" alt="Produto {{ loop.index }}">
+        <div class="card__body">
+          <h3 class="card__title">Produto exemplo</h3>
+          <p class="card__desc">Descrição breve do produto…</p>
+          <div class="price">R$ 0,00</div>
+        </div>
+      </article>
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  {% if user and user.papel == 'admin' %}
+  <!-- MODAL ADICIONAR (ADMIN) -->
+  <div class="modal" id="modalAdicionar" aria-hidden="true">
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="md-title-add">
+      <div class="modal__head">
+        <strong id="md-title-add">Adicionar produto</strong>
+        <button class="btn" onclick="closeModal('modalAdicionar')">Fechar</button>
+      </div>
+      <form class="modal__body" method="post" action="{{ url_for('criar_produto') }}" enctype="multipart/form-data">
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input id="nome" name="nome" type="text" required />
+        </div>
+        <div class="field">
+          <label for="preco">Preço</label>
+          <input id="preco" name="preco" type="number" step="0.01" min="0" required />
+        </div>
+        <div class="field">
+          <label for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label for="imagem">Imagem</label>
+          <input id="imagem" name="imagem" type="file" accept="image/*" />
+        </div>
+        <div class="modal__foot">
+          <button type="button" class="btn" onclick="closeModal('modalAdicionar')">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR (ADMIN) -->
+  <div class="modal" id="modalEditar" aria-hidden="true">
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="md-title-edit">
+      <div class="modal__head">
+        <strong id="md-title-edit">Editar produto</strong>
+        <button class="btn" onclick="closeModal('modalEditar')">Fechar</button>
+      </div>
+      <form class="modal__body" id="formEditar" method="post" action="#" enctype="multipart/form-data">
+        <div class="field">
+          <label for="e_nome">Nome</label>
+          <input id="e_nome" name="nome" type="text" required />
+        </div>
+        <div class="field">
+          <label for="e_preco">Preço</label>
+          <input id="e_preco" name="preco" type="number" step="0.01" min="0" required />
+        </div>
+        <div class="field">
+          <label for="e_descricao">Descrição</label>
+          <textarea id="e_descricao" name="descricao" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label for="e_imagem">Trocar imagem (opcional)</label>
+          <input id="e_imagem" name="imagem" type="file" accept="image/*" />
+        </div>
+        <div class="modal__foot">
+          <button type="button" class="btn" onclick="closeModal('modalEditar')">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Preenche e abre o modal de edição
+  function abrirEditar(btn){
+    const card = btn.closest('.card');
+    const id = card.dataset.id;
+    const nome = card.dataset.nome;
+    const preco = card.dataset.preco;
+    const descricao = card.dataset.descricao || '';
+
+    document.getElementById('e_nome').value = nome;
+    document.getElementById('e_preco').value = preco;
+    document.getElementById('e_descricao').value = descricao;
+
+    const form = document.getElementById('formEditar');
+    form.action = `/produtos/${id}`; // rota POST para editar (app.py)
+    openModal('modalEditar');
+  }
+</script>
+{% endblock %}

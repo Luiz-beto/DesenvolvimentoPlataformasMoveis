@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Sobre - Latitude Sul{% endblock %}
+
+{% block content %}
+  <div class="container" style="max-width:860px;margin:40px auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.06)">
+
+    <header style="margin-bottom:10px">
+      <h1 style="margin:0 0 6px">Sobre este projeto</h1>
+      <div class="text-muted" style="font-size:.95rem">
+        Trabalho da disciplina <strong>Desenvolvimento de Plataformas Móveis</strong> — <strong>UNIDAVI</strong>, campus <em>Rio do Sul – SC</em>.<br>
+        Aluno: <strong>Luiz Roberto Sardanha</strong>
+      </div>
+    </header>
+
+    <hr style="margin:18px 0">
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:1.25rem;margin:0 0 8px">Propósito</h2>
+      <p style="margin:0">
+        Promover junto ao aluno a prática e o desenvolvimento de um <strong>website responsivo</strong> utilizando
+        <strong>layouts com Grid CSS</strong>.
+      </p>
+    </section>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:1.25rem;margin:0 0 8px">Objetivo</h2>
+      <p style="margin:0">
+        Implementar um <strong>website responsivo</strong>.
+      </p>
+    </section>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:1.25rem;margin:0 0 8px">Referência de Layout (Figma)</h2>
+      <p style="margin:0">
+        Implementar com <strong>HTML + CSS</strong> um layout similar ao design:
+        <a href="https://www.figma.com/design/klRQfxzaVso7rn3q3oIbFE/Catalogo_Responsivo?node-id=0-1" target="_blank" rel="noopener">
+          Catálogo Responsivo (Figma)
+        </a>.
+      </p>
+    </section>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:1.25rem;margin:0 0 8px">Elementos necessários</h2>
+      <ul style="margin:0;padding-left:18px">
+        <li>Textos e imagens;</li>
+        <li>Menu de navegação ajustado para menu “hambúrguer” na versão mobile;</li>
+        <li>Rodapé.</li>
+      </ul>
+    </section>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:1.25rem;margin:0 0 8px">O que fazer</h2>
+      <ul style="margin:0;padding-left:18px">
+        <li>Website responsivo usando <strong>Layout Grid CSS</strong>;</li>
+        <li><strong>PWA</strong> — criar o manifesto.</li>
+      </ul>
+    </section>
+
+    <section style="margin:16px 0">
+      <h2 style="font-size:1.25rem;margin:0 0 8px">Detalhamento</h2>
+      <ul style="margin:0;padding-left:18px">
+        <li>Projeto individual;</li>
+        <li>Selecionar a ideia/tema;</li>
+        <li>Desenvolver o website no tema escolhido;</li>
+        <li>Subir o projeto em um repositório público no <strong>GitHub</strong>
+            ou compartilhar acesso com <code>sandro@arealocal.com.br</code> — <code>github.com/sandroaf</code>;</li>
+        <li>Apresentar em sala o website — funcionando de forma responsiva e com <strong>PWA</strong> aplicado;</li>
+        <li>Data de entrega conforme <strong>Google Classroom</strong>.</li>
+      </ul>
+    </section>
+
+    <hr style="margin:18px 0">
+
+    <p class="text-muted" style="margin:0">
+      © {{ current_year|default(now().year) }} — Trabalho acadêmico UNIDAVI, Rio do Sul – SC.
+    </p>
+  </div>
+{% endblock %}
